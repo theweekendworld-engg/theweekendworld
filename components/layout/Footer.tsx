@@ -21,12 +21,14 @@ export default function Footer({ socialLinks = [], githubStats }: FooterProps) {
   const links = socialLinks.length > 0 ? socialLinks : defaultSocialLinks
 
   return (
-    <footer className="border-t bg-background">
-      <div className="container px-4 py-12">
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-4">
+    <footer className="border-t border-border/40 bg-muted/30">
+      <div className="container px-4 py-16">
+        <div className="grid grid-cols-1 gap-12 md:grid-cols-4">
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold">TheWeekendWorld</h3>
-            <p className="text-sm text-muted-foreground">
+            <h3 className="text-lg font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+              TheWeekendWorld
+            </h3>
+            <p className="text-sm text-muted-foreground leading-relaxed">
               Building amazing products and sharing knowledge.
             </p>
           </div>
@@ -67,7 +69,7 @@ export default function Footer({ socialLinks = [], githubStats }: FooterProps) {
                   href={link.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-muted-foreground hover:text-foreground"
+                  className="flex items-center justify-center w-10 h-10 rounded-lg border border-border bg-background text-muted-foreground hover:text-foreground hover:border-foreground/20 hover:bg-muted transition-all"
                   aria-label={link.name}
                 >
                   <span className="sr-only">{link.name}</span>
@@ -90,15 +92,22 @@ export default function Footer({ socialLinks = [], githubStats }: FooterProps) {
               ))}
             </div>
             {githubStats && (
-              <div className="mt-4 text-sm text-muted-foreground">
-                <p>⭐ {githubStats.stars} stars across {githubStats.repos} repos</p>
+              <div className="mt-6 p-4 rounded-lg border border-border bg-background">
+                <p className="text-sm font-medium text-foreground">
+                  ⭐ <span className="font-bold">{githubStats.stars}</span> stars
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  across {githubStats.repos} repositories
+                </p>
               </div>
             )}
           </div>
         </div>
 
-        <div className="mt-8 border-t pt-8 text-center text-sm text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} TheWeekendWorld. All rights reserved.</p>
+        <div className="mt-12 border-t border-border/40 pt-8 text-center">
+          <p className="text-sm text-muted-foreground">
+            &copy; {new Date().getFullYear()} TheWeekendWorld. All rights reserved.
+          </p>
         </div>
       </div>
     </footer>

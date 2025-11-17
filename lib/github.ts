@@ -13,6 +13,11 @@ export async function getGitHubRepoStats(
   repo: string,
   token?: string
 ): Promise<GitHubRepoStats | null> {
+  // Disabled for now - return null to avoid errors
+  return null
+
+  // Original implementation commented out
+  /*
   const cacheKey = `${owner}/${repo}`
   const cached = cache.get(cacheKey)
 
@@ -62,6 +67,7 @@ export async function getGitHubRepoStats(
     }
     return null
   }
+  */
 }
 
 export function extractRepoFromUrl(url: string): { owner: string; repo: string } | null {
