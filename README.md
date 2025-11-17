@@ -154,11 +154,13 @@ The application uses the following main models:
 4. Deploy
 
 Make sure to set:
-- `DATABASE_URL`
-- `NEXTAUTH_SECRET`
-- `NEXTAUTH_URL` (your production URL)
-- `GITHUB_TOKEN` (optional)
-- `NEXT_PUBLIC_BASE_URL` (your production URL)
+- `DATABASE_URL` - Your PostgreSQL connection string
+- `NEXTAUTH_SECRET` - Generate with `openssl rand -base64 32`
+- `NEXTAUTH_URL` - Your production URL (e.g., `https://your-app.vercel.app` or `https://yourdomain.com`)
+- `GITHUB_TOKEN` (optional) - For GitHub API integration
+- `NEXT_PUBLIC_BASE_URL` (optional) - Only needed if using fetch in client components
+
+**Note:** With `trustHost: true` in NextAuth config, Vercel can auto-detect the URL, but it's recommended to set `NEXTAUTH_URL` explicitly for production.
 
 ## Environment Variables
 

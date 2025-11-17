@@ -1,143 +1,283 @@
-import { notFound } from 'next/navigation'
+'use client'
+
+import { useEffect, useState } from 'react'
+import { useParams, notFound } from 'next/navigation'
 import Image from 'next/image'
+import Link from 'next/link'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
-import { getBlogPostBySlug, getBlogPosts } from '@/lib/data/blog'
 
-async function getBlogPost(slug: string) {
-  try {
-    const post = await getBlogPostBySlug(slug)
-    if (!post || !post.published) return null
-    return post
-  } catch (error) {
-    console.error('Error fetching blog post:', error)
-    return null
-  }
+interface BlogPost {
+  id: string
+  slug: string
+  title: string
+  excerpt?: string | null
+  content: string
+  coverImage?: string | null
+  author: string
+  category?: string | null
+  tags?: string[]
+  published: boolean
+  createdAt: string
 }
 
-async function getRelatedPosts(currentSlug: string, category?: string) {
-  try {
-    const posts = await getBlogPosts({ 
-      published: true, 
-      category 
-    })
-    return posts.filter((p) => p.slug !== currentSlug).slice(0, 3)
-  } catch (error) {
-    console.error('Error fetching related posts:', error)
-    return []
+export default function BlogPostPage() {
+  const params = useParams()
+  const slug = params.slug as string
+  const [post, setPost] = useState<BlogPost | null>(null)
+  const [relatedPosts, setRelatedPosts] = useState<BlogPost[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(false)
+
+  useEffect(() => {
+    async function fetchPost() {
+      try {
+        const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || window.location.origin
+        // Browser will automatically cache based on Cache-Control headers
+        const res = await fetch(`${baseUrl}/api/blog/${slug}`, {
+          cache: 'default', // Use browser's HTTP cache
+        })
+        
+        if (!res.ok) {
+          setError(true)
+          setLoading(false)
+          return
+        }
+
+        const fetchedPost = await res.json()
+        
+        if (!fetchedPost || !fetchedPost.published) {
+          setError(true)
+          setLoading(false)
+          return
+        }
+
+        setPost(fetchedPost)
+
+        // Fetch related posts
+        const category = fetchedPost.category
+        const relatedRes = await fetch(
+          `${baseUrl}/api/blog?published=true${category ? `&category=${category}` : ''}`,
+          {
+            cache: 'default',
+          }
+        )
+        if (relatedRes.ok) {
+          const allPosts = await relatedRes.json()
+          const related = allPosts
+            .filter((p: BlogPost) => p.slug !== slug)
+            .slice(0, 3)
+          setRelatedPosts(related)
+        }
+      } catch (err) {
+        console.error('Error fetching blog post:', err)
+        setError(true)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    if (slug) {
+      fetchPost()
+    }
+  }, [slug])
+
+  if (loading) {
+    return (
+      <div className="container px-4 py-16">
+        <div className="mx-auto max-w-4xl">
+          <div className="animate-pulse space-y-8">
+            <div className="h-12 bg-muted rounded-lg w-3/4"></div>
+            <div className="h-6 bg-muted rounded w-1/2"></div>
+            <div className="h-64 bg-muted rounded-lg"></div>
+            <div className="space-y-4">
+              <div className="h-4 bg-muted rounded"></div>
+              <div className="h-4 bg-muted rounded"></div>
+              <div className="h-4 bg-muted rounded w-5/6"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
   }
-}
 
-export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params
-  const post = await getBlogPost(slug)
-  if (!post) return { title: 'Post Not Found' }
-  return {
-    title: `${post.title} - TheWeekendWorld Blog`,
-    description: post.excerpt || post.title,
-  }
-}
-
-export default async function BlogPostPage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params
-  const post = await getBlogPost(slug)
-
-  if (!post) {
+  if (error || !post) {
     notFound()
   }
 
-  const relatedPosts = await getRelatedPosts(slug, post.category || undefined)
+  // Calculate reading time (average 200 words per minute)
+  const wordsPerMinute = 200
+  const wordCount = post.content.split(/\s+/).length
+  const readingTime = Math.ceil(wordCount / wordsPerMinute)
 
   return (
-    <div className="container px-4 py-16">
-      <article className="mx-auto max-w-3xl">
-        {/* Header */}
-        <header className="mb-8">
-          {post.category && (
-            <span className="text-sm font-semibold text-primary">{post.category}</span>
-          )}
-          <h1 className="mt-2 text-4xl font-bold tracking-tight">{post.title}</h1>
-          {post.excerpt && (
-            <p className="mt-4 text-lg text-muted-foreground">{post.excerpt}</p>
-          )}
-          <div className="mt-6 flex items-center gap-4 text-sm text-muted-foreground">
-            <span>By {post.author}</span>
-            <span>•</span>
-            <time dateTime={post.createdAt.toISOString()}>
-              {new Date(post.createdAt).toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-              })}
-            </time>
-          </div>
-        </header>
+    <div className="min-h-screen bg-gradient-to-b from-background via-background to-muted/20">
+      <div className="container px-4 py-8 md:py-12">
+        <article className="mx-auto max-w-4xl">
+          {/* Back Button */}
+          <Link
+            href="/blog"
+            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-8 group"
+          >
+            <span className="transition-transform group-hover:-translate-x-1">←</span>
+            <span>Back to Blog</span>
+          </Link>
 
-        {/* Cover Image */}
-        {post.coverImage && (
-          <div className="relative aspect-video w-full overflow-hidden rounded-lg mb-12">
-            <Image
-              src={post.coverImage}
-              alt={post.title}
-              fill
-              className="object-cover"
-            />
-          </div>
-        )}
-
-        {/* Content */}
-        <div className="prose prose-lg max-w-none">
-          <ReactMarkdown remarkPlugins={[remarkGfm]}>{post.content}</ReactMarkdown>
-        </div>
-
-        {/* Tags */}
-        {post.tags && post.tags.length > 0 && (
-          <div className="mt-12 flex flex-wrap gap-2">
-            {post.tags.map((tag: string) => (
-              <span
-                key={tag}
-                className="rounded-full bg-muted px-3 py-1 text-sm text-muted-foreground"
-              >
-                #{tag}
-              </span>
-            ))}
-          </div>
-        )}
-
-        {/* Related Posts */}
-        {relatedPosts.length > 0 && (
-          <div className="mt-16 border-t pt-12">
-            <h2 className="text-2xl font-bold mb-6">Related Posts</h2>
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {relatedPosts.map((relatedPost: any) => (
-                <a
-                  key={relatedPost.id}
-                  href={`/blog/${relatedPost.slug}`}
-                  className="group rounded-lg border bg-card p-4 shadow-sm transition-shadow hover:shadow-md"
+          {/* Header */}
+          <header className="mb-12">
+            <div className="space-y-4">
+              {post.category && (
+                <Link
+                  href={`/blog?category=${post.category}`}
+                  className="inline-flex items-center rounded-full border border-primary/20 bg-primary/10 px-4 py-1.5 text-sm font-semibold text-primary hover:bg-primary/20 transition-colors"
                 >
-                  {relatedPost.coverImage && (
-                    <div className="relative aspect-video w-full overflow-hidden rounded-lg mb-4">
-                      <Image
-                        src={relatedPost.coverImage}
-                        alt={relatedPost.title}
-                        fill
-                        className="object-cover group-hover:scale-105 transition-transform"
-                      />
-                    </div>
-                  )}
-                  <h3 className="font-semibold">{relatedPost.title}</h3>
-                  {relatedPost.excerpt && (
-                    <p className="mt-2 text-sm text-muted-foreground line-clamp-2">
-                      {relatedPost.excerpt}
-                    </p>
-                  )}
-                </a>
-              ))}
+                  {post.category}
+                </Link>
+              )}
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight leading-tight bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">
+                {post.title}
+              </h1>
+              {post.excerpt && (
+                <p className="text-xl md:text-2xl text-muted-foreground leading-relaxed max-w-3xl">
+                  {post.excerpt}
+                </p>
+              )}
+              <div className="flex flex-wrap items-center gap-4 pt-4 text-sm text-muted-foreground">
+                <div className="flex items-center gap-2">
+                  <div className="h-8 w-8 rounded-full bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center">
+                    <span className="text-xs font-semibold text-primary">
+                      {post.author.charAt(0).toUpperCase()}
+                    </span>
+                  </div>
+                  <span className="font-medium text-foreground">{post.author}</span>
+                </div>
+                <span>•</span>
+                <time dateTime={post.createdAt} className="font-medium">
+                  {new Date(post.createdAt).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                  })}
+                </time>
+                <span>•</span>
+                <span>{readingTime} min read</span>
+              </div>
             </div>
+          </header>
+
+          {/* Cover Image */}
+          {post.coverImage && (
+            <div className="relative aspect-video w-full overflow-hidden rounded-2xl mb-12 shadow-2xl border border-border/50">
+              <Image
+                src={post.coverImage}
+                alt={post.title}
+                fill
+                className="object-cover"
+                priority
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-background/20 via-transparent to-transparent" />
+            </div>
+          )}
+
+          {/* Content */}
+          <div className="prose prose-lg prose-slate dark:prose-invert max-w-none mb-16 
+            prose-headings:font-bold prose-headings:tracking-tight
+            prose-h1:text-4xl prose-h1:mt-12 prose-h1:mb-6
+            prose-h2:text-3xl prose-h2:mt-10 prose-h2:mb-5
+            prose-h3:text-2xl prose-h3:mt-8 prose-h3:mb-4
+            prose-p:leading-relaxed prose-p:text-foreground/90
+            prose-a:text-primary prose-a:no-underline hover:prose-a:underline
+            prose-strong:text-foreground prose-strong:font-semibold
+            prose-code:text-sm prose-code:bg-muted prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded
+            prose-pre:bg-muted prose-pre:border prose-pre:border-border
+            prose-blockquote:border-l-4 prose-blockquote:border-primary prose-blockquote:pl-4 prose-blockquote:italic
+            prose-ul:list-disc prose-ol:list-decimal
+            prose-li:my-2
+            prose-img:rounded-lg prose-img:shadow-lg
+            prose-hr:border-border">
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>{post.content}</ReactMarkdown>
           </div>
-        )}
-      </article>
+
+          {/* Tags */}
+          {post.tags && post.tags.length > 0 && (
+            <div className="mb-16 pt-8 border-t border-border">
+              <h3 className="text-sm font-semibold text-muted-foreground mb-4 uppercase tracking-wider">
+                Tags
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {post.tags.map((tag: string) => (
+                  <Link
+                    key={tag}
+                    href={`/blog?tag=${tag}`}
+                    className="inline-flex items-center rounded-full border border-border bg-muted/50 px-4 py-1.5 text-sm font-medium text-foreground hover:bg-muted hover:border-foreground/20 transition-all"
+                  >
+                    #{tag}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Related Posts */}
+          {relatedPosts.length > 0 && (
+            <div className="mt-16 pt-12 border-t border-border">
+              <div className="mb-8">
+                <h2 className="text-3xl font-bold tracking-tight mb-2">Related Posts</h2>
+                <p className="text-muted-foreground">Continue reading with these related articles</p>
+              </div>
+              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {relatedPosts.map((relatedPost) => (
+                  <Link
+                    key={relatedPost.id}
+                    href={`/blog/${relatedPost.slug}`}
+                    className="group relative overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-sm transition-all hover:shadow-xl hover:shadow-foreground/5 hover:-translate-y-1"
+                  >
+                    {relatedPost.coverImage && (
+                      <div className="relative aspect-video w-full overflow-hidden rounded-xl mb-4 bg-muted">
+                        <Image
+                          src={relatedPost.coverImage}
+                          alt={relatedPost.title}
+                          fill
+                          className="object-cover transition-transform duration-500 group-hover:scale-110"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </div>
+                    )}
+                    <div className="space-y-3">
+                      {relatedPost.category && (
+                        <span className="inline-flex items-center rounded-md border border-border bg-muted/50 px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
+                          {relatedPost.category}
+                        </span>
+                      )}
+                      <h3 className="text-lg font-bold tracking-tight group-hover:text-foreground/80 transition-colors line-clamp-2">
+                        {relatedPost.title}
+                      </h3>
+                      {relatedPost.excerpt && (
+                        <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
+                          {relatedPost.excerpt}
+                        </p>
+                      )}
+                      <div className="flex items-center text-xs text-muted-foreground pt-2">
+                        <time dateTime={relatedPost.createdAt}>
+                          {new Date(relatedPost.createdAt).toLocaleDateString('en-US', {
+                            month: 'short',
+                            day: 'numeric',
+                            year: 'numeric',
+                          })}
+                        </time>
+                      </div>
+                    </div>
+                    <div className="mt-4 flex items-center text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">
+                      Read article
+                      <span className="ml-2 transition-transform group-hover:translate-x-1">→</span>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+        </article>
+      </div>
     </div>
   )
 }
-

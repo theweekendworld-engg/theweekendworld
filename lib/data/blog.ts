@@ -23,8 +23,13 @@ export async function getBlogPosts(options?: {
 }
 
 export async function getBlogPostBySlug(slug: string) {
-  return await prisma.blogPost.findUnique({
-    where: { slug },
-  })
+  try {
+    return await prisma.blogPost.findUnique({
+      where: { slug },
+    })
+  } catch (error) {
+    console.error(`Database error fetching blog post by slug ${slug}:`, error)
+    throw error
+  }
 }
 

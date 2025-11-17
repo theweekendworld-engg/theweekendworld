@@ -1,47 +1,105 @@
-import { notFound } from 'next/navigation'
+'use client'
+
+import { useEffect, useState } from 'react'
+import { useParams, notFound } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
-import { getGitHubRepoStats, extractRepoFromUrl } from '@/lib/github'
+import { extractRepoFromUrl } from '@/lib/github'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
-import { getProductBySlug } from '@/lib/data/products'
 
-async function getProduct(slug: string) {
-  try {
-    const product = await getProductBySlug(slug)
-    if (!product || !product.published) return null
-    return product
-  } catch (error) {
-    console.error('Error fetching product:', error)
-    return null
-  }
+interface Product {
+  id: string
+  slug: string
+  name: string
+  description: string
+  shortDescription?: string
+  featuredImage?: string | null
+  gallery?: any
+  videoUrl?: string | null
+  githubUrl?: string | null
+  liveUrl?: string | null
+  features?: any
+  tags?: string[]
+  published: boolean
+  testimonials?: any[]
 }
 
-export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params
-  const product = await getProduct(slug)
-  if (!product) return { title: 'Product Not Found' }
-  return {
-    title: `${product.name} - TheWeekendWorld`,
-    description: product.shortDescription || product.description,
+export default function ProductDetailPage() {
+  const params = useParams()
+  const slug = params.slug as string
+  const [product, setProduct] = useState<Product | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(false)
+  const [stats, setStats] = useState<any>(null)
+
+  useEffect(() => {
+    async function fetchProduct() {
+      try {
+        const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || window.location.origin
+        // Browser will automatically cache based on Cache-Control headers
+        const res = await fetch(`${baseUrl}/api/products?published=true`, {
+          cache: 'default', // Use browser's HTTP cache
+        })
+        if (!res.ok) {
+          setError(true)
+          setLoading(false)
+          return
+        }
+        const products = await res.json()
+        const foundProduct = products.find((p: Product) => p.slug === slug && p.published)
+        
+        if (!foundProduct) {
+          setError(true)
+          setLoading(false)
+          return
+        }
+
+        setProduct(foundProduct)
+
+        // Fetch GitHub stats if available
+        if (foundProduct.githubUrl) {
+          const repo = extractRepoFromUrl(foundProduct.githubUrl)
+          if (repo) {
+            try {
+              const statsRes = await fetch(`${baseUrl}/api/github/stats/${repo.owner}/${repo.repo}`, {
+                cache: 'default',
+              })
+              if (statsRes.ok) {
+                const githubStats = await statsRes.json()
+                setStats(githubStats)
+              }
+            } catch (err) {
+              // GitHub stats are optional
+            }
+          }
+        }
+      } catch (err) {
+        console.error('Error fetching product:', err)
+        setError(true)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    if (slug) {
+      fetchProduct()
+    }
+  }, [slug])
+
+  if (loading) {
+    return (
+      <div className="container px-4 py-16">
+        <div className="mx-auto max-w-4xl text-center">
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    )
   }
-}
 
-export default async function ProductDetailPage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params
-  const product = await getProduct(slug)
-
-  if (!product) {
+  if (error || !product) {
     notFound()
   }
-
-  const stats = product.githubUrl
-    ? await getGitHubRepoStats(
-        extractRepoFromUrl(product.githubUrl)?.owner || '',
-        extractRepoFromUrl(product.githubUrl)?.repo || '',
-        process.env.GITHUB_TOKEN
-      )
-    : null
 
   const gallery = product.gallery && Array.isArray(product.gallery) ? product.gallery : []
 
@@ -207,4 +265,3 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
     </div>
   )
 }
-

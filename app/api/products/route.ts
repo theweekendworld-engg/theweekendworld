@@ -14,7 +14,10 @@ export async function GET(request: NextRequest) {
       featured: featured === 'true' ? true : undefined,
     })
 
-    return NextResponse.json(products)
+    const response = NextResponse.json(products)
+    // Cache for 5 minutes, revalidate on hard reload
+    response.headers.set('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=600')
+    return response
   } catch (error) {
     console.error('Error fetching products:', error)
     return NextResponse.json(

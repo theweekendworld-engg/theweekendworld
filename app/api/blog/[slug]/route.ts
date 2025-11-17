@@ -15,7 +15,10 @@ export async function GET(
       return NextResponse.json({ error: 'Post not found' }, { status: 404 })
     }
 
-    return NextResponse.json(post)
+    const response = NextResponse.json(post)
+    // Cache for 5 minutes, revalidate on hard reload
+    response.headers.set('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=600')
+    return response
   } catch (error) {
     console.error('Error fetching blog post:', error)
     return NextResponse.json(

@@ -25,14 +25,19 @@ export async function getProducts(options?: {
 }
 
 export async function getProductBySlug(slug: string) {
-  return await prisma.product.findUnique({
-    where: {
-      slug,
-    },
-    include: {
-      testimonials: true,
-    },
-  })
+  try {
+    return await prisma.product.findUnique({
+      where: {
+        slug,
+      },
+      include: {
+        testimonials: true,
+      },
+    })
+  } catch (error) {
+    console.error(`Database error fetching product by slug ${slug}:`, error)
+    throw error
+  }
 }
 
 export async function getProductById(id: string) {

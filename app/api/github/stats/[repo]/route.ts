@@ -27,7 +27,10 @@ export async function GET(
       )
     }
 
-    return NextResponse.json(stats)
+    const response = NextResponse.json(stats)
+    // Cache GitHub stats for 10 minutes (they don't change frequently)
+    response.headers.set('Cache-Control', 'public, s-maxage=600, stale-while-revalidate=1200')
+    return response
   } catch (error) {
     console.error('Error fetching GitHub stats:', error)
     return NextResponse.json(
