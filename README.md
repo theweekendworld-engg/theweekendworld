@@ -1,36 +1,169 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# TheWeekendWorld Website
+
+A modern, professional Next.js website showcasing products, blog posts, and resources. Built with Next.js 15, TypeScript, Prisma, and PostgreSQL.
+
+## Features
+
+- **Public Pages**: Homepage, Products listing/detail, Blog listing/detail, Contact page
+- **Admin Panel**: Protected admin interface for managing content
+- **Product Management**: Create, edit, and manage products with features, testimonials, and media
+- **Blog Management**: Write and publish blog posts with markdown support
+- **GitHub Integration**: Real-time GitHub star counts for repositories
+- **SEO Optimized**: Sitemap, robots.txt, and proper metadata
+- **Modern UI**: Professional design with Tailwind CSS
+
+## Tech Stack
+
+- **Framework**: Next.js 15 (App Router)
+- **Database**: PostgreSQL with Prisma ORM
+- **Authentication**: NextAuth.js
+- **Styling**: Tailwind CSS
+- **Markdown**: react-markdown with remark-gfm
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
 
+- Bun (latest version)
+- PostgreSQL database
+
+### Installation
+
+1. Clone the repository:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone <repository-url>
+cd theweekendworld
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Install dependencies:
+```bash
+bun install
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. Set up environment variables:
+```bash
+cp env.example .env
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Edit `.env` and add your configuration:
+```env
+DATABASE_URL=postgresql://user:password@localhost:5432/theweekendworld
+NEXTAUTH_SECRET=your-secret-key-here
+NEXTAUTH_URL=http://localhost:3000
+GITHUB_TOKEN=your_github_token (optional)
+```
 
-## Learn More
+4. Set up the database:
+```bash
+# Generate Prisma client
+bun run db:generate
 
-To learn more about Next.js, take a look at the following resources:
+# Run migrations
+bun run db:migrate
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+5. Create an admin user:
+```bash
+bun run create-admin
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+6. Start the development server:
+```bash
+bun run dev
+```
 
-## Deploy on Vercel
+Visit `http://localhost:3000` to see the website.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Project Structure
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```
+theweekendworld/
+├── app/
+│   ├── (public)/          # Public routes
+│   │   ├── page.tsx       # Homepage
+│   │   ├── products/      # Products pages
+│   │   ├── blog/          # Blog pages
+│   │   └── contact/       # Contact page
+│   ├── admin/             # Admin panel (protected)
+│   │   ├── login/         # Admin login
+│   │   ├── products/      # Product management
+│   │   ├── blog/          # Blog management
+│   │   └── settings/      # Site settings
+│   ├── api/               # API routes
+│   │   ├── auth/          # Authentication
+│   │   ├── products/      # Products API
+│   │   ├── blog/          # Blog API
+│   │   ├── contact/       # Contact API
+│   │   └── github/        # GitHub API proxy
+│   ├── sitemap.ts         # Sitemap generation
+│   └── robots.ts          # Robots.txt
+├── components/
+│   ├── layout/            # Header, Footer
+│   ├── product/           # Product components
+│   ├── blog/              # Blog components
+│   └── providers/         # React providers
+├── lib/
+│   ├── db.ts              # Prisma client
+│   ├── auth.ts            # NextAuth config
+│   ├── github.ts          # GitHub API client
+│   └── utils.ts           # Utilities
+├── prisma/
+│   └── schema.prisma      # Database schema
+└── scripts/
+    └── create-admin.ts    # Admin user creation script
+```
+
+## Available Scripts
+
+- `bun run dev` - Start development server
+- `bun run build` - Build for production
+- `bun run start` - Start production server
+- `bun run lint` - Run ESLint
+- `bun run db:generate` - Generate Prisma client
+- `bun run db:migrate` - Run database migrations
+- `bun run db:studio` - Open Prisma Studio
+- `bun run create-admin` - Create admin user
+
+## Admin Panel
+
+Access the admin panel at `/admin`. You'll be redirected to `/admin/login` if not authenticated.
+
+The admin panel allows you to:
+- Manage products (create, edit, delete)
+- Manage blog posts
+- Configure site settings
+- View contact submissions
+
+## Database Schema
+
+The application uses the following main models:
+- **Product**: Products with features, testimonials, and media
+- **BlogPost**: Blog articles with markdown content
+- **Testimonial**: Product testimonials
+- **ContactSubmission**: Contact form submissions
+- **SiteSetting**: Site configuration
+- **AdminUser**: Admin authentication
+
+## Deployment
+
+### Vercel
+
+1. Push your code to GitHub
+2. Import the project in Vercel
+3. Add environment variables in Vercel dashboard
+4. Deploy
+
+Make sure to set:
+- `DATABASE_URL`
+- `NEXTAUTH_SECRET`
+- `NEXTAUTH_URL` (your production URL)
+- `GITHUB_TOKEN` (optional)
+- `NEXT_PUBLIC_BASE_URL` (your production URL)
+
+## Environment Variables
+
+See `env.example` for all required environment variables.
+
+## License
+
+MIT

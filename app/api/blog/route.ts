@@ -1,0 +1,83 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { auth } from '@/lib/auth'
+import { prisma } from '@/lib/db'
+
+export async function GET(request: NextRequest) {
+  try {
+    const searchParams = request.nextUrl.searchParams
+    const published = searchParams.get('published')
+    const category = searchParams.get('category')
+    const featured = searchParams.get('featured')
+
+    const where: any = {}
+    if (published === 'true') {
+      where.published = true
+    }
+    if (category) {
+      where.category = category
+    }
+    if (featured === 'true') {
+      where.featured = true
+    }
+
+    const posts = await prisma.blogPost.findMany({
+      where,
+      orderBy: { createdAt: 'desc' },
+    })
+
+    return NextResponse.json(posts)
+  } catch (error) {
+    console.error('Error fetching blog posts:', error)
+    return NextResponse.json(
+      { error: 'Failed to fetch blog posts' },
+      { status: 500 }
+    )
+  }
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    const session = await auth()
+    if (!session) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const body = await request.json()
+    const {
+      slug,
+      title,
+      excerpt,
+      content,
+      coverImage,
+      author,
+      category,
+      tags,
+      published,
+      featured,
+    } = body
+
+    const post = await prisma.blogPost.create({
+      data: {
+        slug,
+        title,
+        excerpt,
+        content,
+        coverImage,
+        author: author || 'TheWeekendWorld',
+        category,
+        tags: tags || [],
+        published: published || false,
+        featured: featured || false,
+      },
+    })
+
+    return NextResponse.json(post, { status: 201 })
+  } catch (error) {
+    console.error('Error creating blog post:', error)
+    return NextResponse.json(
+      { error: 'Failed to create blog post' },
+      { status: 500 }
+    )
+  }
+}
+
