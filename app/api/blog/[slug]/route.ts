@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/db'
+import { getBlogPostBySlug } from '@/lib/data/blog'
 
 export async function GET(
   request: NextRequest,
@@ -8,9 +9,7 @@ export async function GET(
 ) {
   try {
     const { slug } = await params
-    const post = await prisma.blogPost.findUnique({
-      where: { slug },
-    })
+    const post = await getBlogPostBySlug(slug)
 
     if (!post) {
       return NextResponse.json({ error: 'Post not found' }, { status: 404 })

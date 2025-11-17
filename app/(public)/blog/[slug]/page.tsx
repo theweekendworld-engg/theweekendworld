@@ -2,28 +2,28 @@ import { notFound } from 'next/navigation'
 import Image from 'next/image'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
+import { getBlogPostBySlug, getBlogPosts } from '@/lib/data/blog'
 
 async function getBlogPost(slug: string) {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/blog/${slug}`, {
-      cache: 'no-store',
-    })
-    if (!res.ok) return null
-    return res.json()
-  } catch {
+    const post = await getBlogPostBySlug(slug)
+    if (!post || !post.published) return null
+    return post
+  } catch (error) {
+    console.error('Error fetching blog post:', error)
     return null
   }
 }
 
 async function getRelatedPosts(currentSlug: string, category?: string) {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/blog?published=true${category ? `&category=${category}` : ''}`, {
-      cache: 'no-store',
+    const posts = await getBlogPosts({ 
+      published: true, 
+      category 
     })
-    if (!res.ok) return []
-    const posts = await res.json()
-    return posts.filter((p: any) => p.slug !== currentSlug).slice(0, 3)
-  } catch {
+    return posts.filter((p) => p.slug !== currentSlug).slice(0, 3)
+  } catch (error) {
+    console.error('Error fetching related posts:', error)
     return []
   }
 }
@@ -46,7 +46,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
     notFound()
   }
 
-  const relatedPosts = await getRelatedPosts(slug, post.category)
+  const relatedPosts = await getRelatedPosts(slug, post.category || undefined)
 
   return (
     <div className="container px-4 py-16">
@@ -63,7 +63,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
           <div className="mt-6 flex items-center gap-4 text-sm text-muted-foreground">
             <span>By {post.author}</span>
             <span>•</span>
-            <time dateTime={post.createdAt}>
+            <time dateTime={post.createdAt.toISOString()}>
               {new Date(post.createdAt).toLocaleDateString('en-US', {
                 year: 'numeric',
                 month: 'long',

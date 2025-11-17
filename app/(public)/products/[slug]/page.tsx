@@ -4,16 +4,15 @@ import Link from 'next/link'
 import { getGitHubRepoStats, extractRepoFromUrl } from '@/lib/github'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
+import { getProductBySlug } from '@/lib/data/products'
 
 async function getProduct(slug: string) {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/products?published=true`, {
-      cache: 'no-store',
-    })
-    if (!res.ok) return null
-    const products = await res.json()
-    return products.find((p: any) => p.slug === slug) || null
-  } catch {
+    const product = await getProductBySlug(slug)
+    if (!product || !product.published) return null
+    return product
+  } catch (error) {
+    console.error('Error fetching product:', error)
     return null
   }
 }
@@ -133,16 +132,18 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
           <div className="mb-12">
             <h2 className="text-2xl font-bold mb-6">Gallery</h2>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {gallery.map((image: string, index: number) => (
-                <div key={index} className="relative aspect-video w-full overflow-hidden rounded-lg">
-                  <Image
-                    src={image}
-                    alt={`${product.name} - Image ${index + 1}`}
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-              ))}
+              {gallery
+                .filter((image: any) => typeof image === 'string')
+                .map((image: string, index: number) => (
+                  <div key={index} className="relative aspect-video w-full overflow-hidden rounded-lg">
+                    <Image
+                      src={image}
+                      alt={`${product.name} - Image ${index + 1}`}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                ))}
             </div>
           </div>
         )}

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/db'
+import { getProducts } from '@/lib/data/products'
 
 export async function GET(request: NextRequest) {
   try {
@@ -8,23 +9,9 @@ export async function GET(request: NextRequest) {
     const published = searchParams.get('published')
     const featured = searchParams.get('featured')
 
-    const where: any = {}
-    if (published === 'true') {
-      where.published = true
-    }
-    if (featured === 'true') {
-      where.featured = true
-    }
-
-    const products = await prisma.product.findMany({
-      where,
-      include: {
-        testimonials: true,
-      },
-      orderBy: [
-        { order: 'asc' },
-        { createdAt: 'desc' },
-      ],
+    const products = await getProducts({
+      published: published === 'true' ? true : undefined,
+      featured: featured === 'true' ? true : undefined,
     })
 
     return NextResponse.json(products)

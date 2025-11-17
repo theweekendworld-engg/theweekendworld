@@ -1,14 +1,12 @@
 import Link from 'next/link'
 import Image from 'next/image'
+import { getBlogPosts } from '@/lib/data/blog'
 
-async function getBlogPosts() {
+async function fetchBlogPosts() {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/blog?published=true`, {
-      cache: 'no-store',
-    })
-    if (!res.ok) return []
-    return res.json()
-  } catch {
+    return await getBlogPosts({ published: true })
+  } catch (error) {
+    console.error('Error fetching blog posts:', error)
     return []
   }
 }
@@ -19,7 +17,7 @@ export const metadata = {
 }
 
 export default async function BlogPage() {
-  const posts = await getBlogPosts()
+  const posts = await fetchBlogPosts()
 
   return (
     <div className="flex flex-col">

@@ -1,27 +1,23 @@
 import Link from 'next/link'
 import Image from 'next/image'
+import { getProducts } from '@/lib/data/products'
+import { getBlogPosts } from '@/lib/data/blog'
 
 async function getFeaturedProducts() {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/products?featured=true&published=true`, {
-      cache: 'no-store',
-    })
-    if (!res.ok) return []
-    return res.json()
-  } catch {
+    return await getProducts({ published: true, featured: true })
+  } catch (error) {
+    console.error('Error fetching featured products:', error)
     return []
   }
 }
 
 async function getRecentBlogPosts() {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/blog?published=true`, {
-      cache: 'no-store',
-    })
-    if (!res.ok) return []
-    const posts = await res.json()
+    const posts = await getBlogPosts({ published: true })
     return posts.slice(0, 3)
-  } catch {
+  } catch (error) {
+    console.error('Error fetching blog posts:', error)
     return []
   }
 }

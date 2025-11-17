@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/db'
+import { getProductById } from '@/lib/data/products'
 
 export async function GET(
   request: NextRequest,
@@ -8,12 +9,7 @@ export async function GET(
 ) {
   try {
     const { id } = await params
-    const product = await prisma.product.findUnique({
-      where: { id },
-      include: {
-        testimonials: true,
-      },
-    })
+    const product = await getProductById(id)
 
     if (!product) {
       return NextResponse.json({ error: 'Product not found' }, { status: 404 })

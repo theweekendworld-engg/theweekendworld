@@ -1,15 +1,13 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { getGitHubRepoStats, extractRepoFromUrl } from '@/lib/github'
+import { getProducts } from '@/lib/data/products'
 
-async function getProducts() {
+async function fetchProducts() {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/products?published=true`, {
-      cache: 'no-store',
-    })
-    if (!res.ok) return []
-    return res.json()
-  } catch {
+    return await getProducts({ published: true })
+  } catch (error) {
+    console.error('Error fetching products:', error)
     return []
   }
 }
@@ -27,7 +25,7 @@ export const metadata = {
 }
 
 export default async function ProductsPage() {
-  const products = await getProducts()
+  const products = await fetchProducts()
 
   return (
     <div className="flex flex-col">
