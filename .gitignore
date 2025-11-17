@@ -44,7 +44,6 @@ next-env.d.ts
 /app/generated/prisma
 
 # prisma
-prisma/migrations   
-prisma/schema.prisma
+prisma/migrations
 prisma.config.ts
 prisma/seed.ts

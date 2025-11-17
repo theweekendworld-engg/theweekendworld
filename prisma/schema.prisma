@@ -1,0 +1,105 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Product {
+  id               String       @id @default(cuid())
+  slug             String       @unique
+  name             String
+  description      String       @db.Text
+  shortDescription String?
+  featuredImage    String?
+  gallery          Json?        // Array of image URLs
+  videoUrl         String?
+  githubUrl        String?
+  liveUrl          String?
+  features         Json?        // Array of feature objects
+  tags             String[]     @default([])
+  published        Boolean      @default(false)
+  featured         Boolean      @default(false)
+  order            Int          @default(0)
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+  testimonials     Testimonial[]
+
+  @@index([slug])
+  @@index([published])
+  @@index([featured])
+}
+
+model Testimonial {
+  id        String   @id @default(cuid())
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  author    String
+  role      String?
+  company   String?
+  content   String   @db.Text
+  avatar    String?
+  rating    Int?     @default(5)
+  createdAt DateTime @default(now())
+
+  @@index([productId])
+}
+
+model BlogPost {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  title       String
+  excerpt     String?  @db.Text
+  content     String   @db.Text
+  coverImage  String?
+  author      String   @default("TheWeekendWorld")
+  category    String?
+  tags        String[] @default([])
+  published   Boolean  @default(false)
+  featured    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([slug])
+  @@index([published])
+  @@index([category])
+}
+
+model ContactSubmission {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  subject   String?
+  message   String   @db.Text
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([read])
+  @@index([createdAt])
+}
+
+model SiteSetting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([key])
+}
+
+model AdminUser {
+  id           String   @id @default(cuid())
+  username     String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+  lastLogin    DateTime?
+
+  @@index([username])
+}
