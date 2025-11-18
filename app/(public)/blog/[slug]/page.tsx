@@ -33,7 +33,7 @@ export default async function BlogPostPage({ params }: PageProps) {
       category: post.category 
     })
     relatedPosts = allPosts
-      .filter((p) => p.slug !== slug)
+      .filter((p:any) => p.slug !== slug)
       .slice(0, 3)
   }
 

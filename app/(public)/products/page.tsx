@@ -108,7 +108,7 @@ export default async function ProductsPage() {
                 </Link>
                 )
               })
-            )).map((item) => item)}
+            )).map((item:any) => item)}
           </div>
         </section>
       )}
