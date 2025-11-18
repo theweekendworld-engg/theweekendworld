@@ -54,7 +54,10 @@ export const ModelName = {
   BlogPost: 'BlogPost',
   ContactSubmission: 'ContactSubmission',
   SiteSetting: 'SiteSetting',
-  AdminUser: 'AdminUser'
+  AdminUser: 'AdminUser',
+  BlogLike: 'BlogLike',
+  BlogComment: 'BlogComment',
+  ProductInterest: 'ProductInterest'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -163,6 +166,49 @@ export const AdminUserScalarFieldEnum = {
 } as const
 
 export type AdminUserScalarFieldEnum = (typeof AdminUserScalarFieldEnum)[keyof typeof AdminUserScalarFieldEnum]
+
+
+export const BlogLikeScalarFieldEnum = {
+  id: 'id',
+  blogPostId: 'blogPostId',
+  userIdentifier: 'userIdentifier',
+  createdAt: 'createdAt'
+} as const
+
+export type BlogLikeScalarFieldEnum = (typeof BlogLikeScalarFieldEnum)[keyof typeof BlogLikeScalarFieldEnum]
+
+
+export const BlogCommentScalarFieldEnum = {
+  id: 'id',
+  blogPostId: 'blogPostId',
+  content: 'content',
+  authorName: 'authorName',
+  email: 'email',
+  isAnonymous: 'isAnonymous',
+  approved: 'approved',
+  userIdentifier: 'userIdentifier',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  parentId: 'parentId'
+} as const
+
+export type BlogCommentScalarFieldEnum = (typeof BlogCommentScalarFieldEnum)[keyof typeof BlogCommentScalarFieldEnum]
+
+
+export const ProductInterestScalarFieldEnum = {
+  id: 'id',
+  productId: 'productId',
+  name: 'name',
+  email: 'email',
+  message: 'message',
+  status: 'status',
+  notes: 'notes',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  read: 'read'
+} as const
+
+export type ProductInterestScalarFieldEnum = (typeof ProductInterestScalarFieldEnum)[keyof typeof ProductInterestScalarFieldEnum]
 
 
 export const SortOrder = {

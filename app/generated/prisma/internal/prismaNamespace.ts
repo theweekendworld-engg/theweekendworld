@@ -395,7 +395,10 @@ export const ModelName = {
   BlogPost: 'BlogPost',
   ContactSubmission: 'ContactSubmission',
   SiteSetting: 'SiteSetting',
-  AdminUser: 'AdminUser'
+  AdminUser: 'AdminUser',
+  BlogLike: 'BlogLike',
+  BlogComment: 'BlogComment',
+  ProductInterest: 'ProductInterest'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -411,7 +414,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "product" | "testimonial" | "blogPost" | "contactSubmission" | "siteSetting" | "adminUser"
+    modelProps: "product" | "testimonial" | "blogPost" | "contactSubmission" | "siteSetting" | "adminUser" | "blogLike" | "blogComment" | "productInterest"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -859,6 +862,228 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    BlogLike: {
+      payload: Prisma.$BlogLikePayload<ExtArgs>
+      fields: Prisma.BlogLikeFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.BlogLikeFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BlogLikePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.BlogLikeFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BlogLikePayload>
+        }
+        findFirst: {
+          args: Prisma.BlogLikeFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BlogLikePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.BlogLikeFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BlogLikePayload>
+        }
+        findMany: {
+          args: Prisma.BlogLikeFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BlogLikePayload>[]
+        }
+        create: {
+          args: Prisma.BlogLikeCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BlogLikePayload>
+        }
+        createMany: {
+          args: Prisma.BlogLikeCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.BlogLikeCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BlogLikePayload>[]
+        }
+        delete: {
+          args: Prisma.BlogLikeDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BlogLikePayload>
+        }
+        update: {
+          args: Prisma.BlogLikeUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BlogLikePayload>
+        }
+        deleteMany: {
+          args: Prisma.BlogLikeDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.BlogLikeUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.BlogLikeUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BlogLikePayload>[]
+        }
+        upsert: {
+          args: Prisma.BlogLikeUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BlogLikePayload>
+        }
+        aggregate: {
+          args: Prisma.BlogLikeAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateBlogLike>
+        }
+        groupBy: {
+          args: Prisma.BlogLikeGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.BlogLikeGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.BlogLikeCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.BlogLikeCountAggregateOutputType> | number
+        }
+      }
+    }
+    BlogComment: {
+      payload: Prisma.$BlogCommentPayload<ExtArgs>
+      fields: Prisma.BlogCommentFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.BlogCommentFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BlogCommentPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.BlogCommentFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BlogCommentPayload>
+        }
+        findFirst: {
+          args: Prisma.BlogCommentFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BlogCommentPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.BlogCommentFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BlogCommentPayload>
+        }
+        findMany: {
+          args: Prisma.BlogCommentFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BlogCommentPayload>[]
+        }
+        create: {
+          args: Prisma.BlogCommentCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BlogCommentPayload>
+        }
+        createMany: {
+          args: Prisma.BlogCommentCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.BlogCommentCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BlogCommentPayload>[]
+        }
+        delete: {
+          args: Prisma.BlogCommentDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BlogCommentPayload>
+        }
+        update: {
+          args: Prisma.BlogCommentUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BlogCommentPayload>
+        }
+        deleteMany: {
+          args: Prisma.BlogCommentDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.BlogCommentUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.BlogCommentUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BlogCommentPayload>[]
+        }
+        upsert: {
+          args: Prisma.BlogCommentUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BlogCommentPayload>
+        }
+        aggregate: {
+          args: Prisma.BlogCommentAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateBlogComment>
+        }
+        groupBy: {
+          args: Prisma.BlogCommentGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.BlogCommentGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.BlogCommentCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.BlogCommentCountAggregateOutputType> | number
+        }
+      }
+    }
+    ProductInterest: {
+      payload: Prisma.$ProductInterestPayload<ExtArgs>
+      fields: Prisma.ProductInterestFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ProductInterestFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProductInterestPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ProductInterestFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProductInterestPayload>
+        }
+        findFirst: {
+          args: Prisma.ProductInterestFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProductInterestPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ProductInterestFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProductInterestPayload>
+        }
+        findMany: {
+          args: Prisma.ProductInterestFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProductInterestPayload>[]
+        }
+        create: {
+          args: Prisma.ProductInterestCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProductInterestPayload>
+        }
+        createMany: {
+          args: Prisma.ProductInterestCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ProductInterestCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProductInterestPayload>[]
+        }
+        delete: {
+          args: Prisma.ProductInterestDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProductInterestPayload>
+        }
+        update: {
+          args: Prisma.ProductInterestUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProductInterestPayload>
+        }
+        deleteMany: {
+          args: Prisma.ProductInterestDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ProductInterestUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ProductInterestUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProductInterestPayload>[]
+        }
+        upsert: {
+          args: Prisma.ProductInterestUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProductInterestPayload>
+        }
+        aggregate: {
+          args: Prisma.ProductInterestAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateProductInterest>
+        }
+        groupBy: {
+          args: Prisma.ProductInterestGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ProductInterestGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ProductInterestCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ProductInterestCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -988,6 +1213,49 @@ export const AdminUserScalarFieldEnum = {
 } as const
 
 export type AdminUserScalarFieldEnum = (typeof AdminUserScalarFieldEnum)[keyof typeof AdminUserScalarFieldEnum]
+
+
+export const BlogLikeScalarFieldEnum = {
+  id: 'id',
+  blogPostId: 'blogPostId',
+  userIdentifier: 'userIdentifier',
+  createdAt: 'createdAt'
+} as const
+
+export type BlogLikeScalarFieldEnum = (typeof BlogLikeScalarFieldEnum)[keyof typeof BlogLikeScalarFieldEnum]
+
+
+export const BlogCommentScalarFieldEnum = {
+  id: 'id',
+  blogPostId: 'blogPostId',
+  content: 'content',
+  authorName: 'authorName',
+  email: 'email',
+  isAnonymous: 'isAnonymous',
+  approved: 'approved',
+  userIdentifier: 'userIdentifier',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  parentId: 'parentId'
+} as const
+
+export type BlogCommentScalarFieldEnum = (typeof BlogCommentScalarFieldEnum)[keyof typeof BlogCommentScalarFieldEnum]
+
+
+export const ProductInterestScalarFieldEnum = {
+  id: 'id',
+  productId: 'productId',
+  name: 'name',
+  email: 'email',
+  message: 'message',
+  status: 'status',
+  notes: 'notes',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  read: 'read'
+} as const
+
+export type ProductInterestScalarFieldEnum = (typeof ProductInterestScalarFieldEnum)[keyof typeof ProductInterestScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -1213,6 +1481,9 @@ export type GlobalOmitConfig = {
   contactSubmission?: Prisma.ContactSubmissionOmit
   siteSetting?: Prisma.SiteSettingOmit
   adminUser?: Prisma.AdminUserOmit
+  blogLike?: Prisma.BlogLikeOmit
+  blogComment?: Prisma.BlogCommentOmit
+  productInterest?: Prisma.ProductInterestOmit
 }
 
 /* Types for Logging */

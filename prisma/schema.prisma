@@ -12,24 +12,25 @@ datasource db {
 }
 
 model Product {
-  id               String       @id @default(cuid())
-  slug             String       @unique
+  id               String            @id @default(cuid())
+  slug             String            @unique
   name             String
-  description      String       @db.Text
+  description      String            @db.Text
   shortDescription String?
   featuredImage    String?
-  gallery          Json?        // Array of image URLs
+  gallery          Json? // Array of image URLs
   videoUrl         String?
   githubUrl        String?
   liveUrl          String?
-  features         Json?        // Array of feature objects
-  tags             String[]     @default([])
-  published        Boolean      @default(false)
-  featured         Boolean      @default(false)
-  order            Int          @default(0)
-  createdAt        DateTime     @default(now())
-  updatedAt        DateTime     @updatedAt
+  features         Json? // Array of feature objects
+  tags             String[]          @default([])
+  published        Boolean           @default(false)
+  featured         Boolean           @default(false)
+  order            Int               @default(0)
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
   testimonials     Testimonial[]
+  interests        ProductInterest[]
 
   @@index([slug])
   @@index([published])
@@ -52,19 +53,21 @@ model Testimonial {
 }
 
 model BlogPost {
-  id          String   @id @default(cuid())
-  slug        String   @unique
-  title       String
-  excerpt     String?  @db.Text
-  content     String   @db.Text
-  coverImage  String?
-  author      String   @default("TheWeekendWorld")
-  category    String?
-  tags        String[] @default([])
-  published   Boolean  @default(false)
-  featured    Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id         String        @id @default(cuid())
+  slug       String        @unique
+  title      String
+  excerpt    String?       @db.Text
+  content    String        @db.Text
+  coverImage String?
+  author     String        @default("TheWeekendWorld")
+  category   String?
+  tags       String[]      @default([])
+  published  Boolean       @default(false)
+  featured   Boolean       @default(false)
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+  likes      BlogLike[]
+  comments   BlogComment[]
 
   @@index([slug])
   @@index([published])
@@ -95,11 +98,64 @@ model SiteSetting {
 }
 
 model AdminUser {
-  id           String   @id @default(cuid())
-  username     String   @unique
+  id           String    @id @default(cuid())
+  username     String    @unique
   passwordHash String
-  createdAt    DateTime @default(now())
+  createdAt    DateTime  @default(now())
   lastLogin    DateTime?
 
   @@index([username])
+}
+
+model BlogLike {
+  id             String   @id @default(cuid())
+  blogPostId     String
+  blogPost       BlogPost @relation(fields: [blogPostId], references: [id], onDelete: Cascade)
+  userIdentifier String // IP address hash or session ID
+  createdAt      DateTime @default(now())
+
+  @@unique([blogPostId, userIdentifier])
+  @@index([blogPostId])
+  @@index([createdAt])
+}
+
+model BlogComment {
+  id             String        @id @default(cuid())
+  blogPostId     String
+  blogPost       BlogPost      @relation(fields: [blogPostId], references: [id], onDelete: Cascade)
+  content        String        @db.Text
+  authorName     String? // Display name (can be "Anonymous" or custom name)
+  email          String? // Optional email (for notifications/replies)
+  isAnonymous    Boolean       @default(false)
+  approved       Boolean       @default(true) // Auto-approve, admin can moderate
+  userIdentifier String? // IP hash for spam prevention
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  parentId       String?
+  parent         BlogComment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies        BlogComment[] @relation("CommentReplies")
+
+  @@index([blogPostId])
+  @@index([parentId])
+  @@index([approved])
+  @@index([createdAt])
+}
+
+model ProductInterest {
+  id        String   @id @default(cuid())
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  name      String
+  email     String
+  message   String?  @db.Text // Optional message/use case
+  status    String   @default("pending") // pending, contacted, closed
+  notes     String?  @db.Text // Admin notes
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  read      Boolean  @default(false)
+
+  @@index([productId])
+  @@index([status])
+  @@index([read])
+  @@index([createdAt])
 }

@@ -6,6 +6,8 @@ import Image from 'next/image'
 import Link from 'next/link'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
+import BlogLikes from '@/components/blog/BlogLikes'
+import BlogComments from '@/components/blog/BlogComments'
 
 interface BlogPost {
   id: string
@@ -180,7 +182,7 @@ export default function BlogPostPage() {
           )}
 
           {/* Content */}
-          <div className="prose prose-lg prose-slate dark:prose-invert max-w-none mb-16 
+          <div className="prose prose-lg prose-slate dark:prose-invert max-w-none mb-12 
             prose-headings:font-bold prose-headings:tracking-tight
             prose-h1:text-4xl prose-h1:mt-12 prose-h1:mb-6
             prose-h2:text-3xl prose-h2:mt-10 prose-h2:mb-5
@@ -196,6 +198,11 @@ export default function BlogPostPage() {
             prose-img:rounded-lg prose-img:shadow-lg
             prose-hr:border-border">
             <ReactMarkdown remarkPlugins={[remarkGfm]}>{post.content}</ReactMarkdown>
+          </div>
+
+          {/* Likes */}
+          <div className="mb-12 flex items-center justify-center">
+            <BlogLikes slug={slug} />
           </div>
 
           {/* Tags */}
@@ -217,6 +224,9 @@ export default function BlogPostPage() {
               </div>
             </div>
           )}
+
+          {/* Comments */}
+          <BlogComments slug={slug} />
 
           {/* Related Posts */}
           {relatedPosts.length > 0 && (

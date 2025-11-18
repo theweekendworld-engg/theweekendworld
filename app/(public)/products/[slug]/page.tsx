@@ -7,6 +7,7 @@ import Link from 'next/link'
 import { extractRepoFromUrl } from '@/lib/github'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
+import ProductInterestForm from '@/components/products/ProductInterestForm'
 
 interface Product {
   id: string
@@ -248,20 +249,25 @@ export default function ProductDetailPage() {
           </div>
         )}
 
-        {/* Tags */}
-        {product.tags && product.tags.length > 0 && (
-          <div className="flex flex-wrap gap-2">
-            {product.tags.map((tag: string) => (
-              <span
-                key={tag}
-                className="rounded-full bg-muted px-3 py-1 text-sm text-muted-foreground"
-              >
-                {tag}
-              </span>
-            ))}
+          {/* Tags */}
+          {product.tags && product.tags.length > 0 && (
+            <div className="mb-12 flex flex-wrap gap-2">
+              {product.tags.map((tag: string) => (
+                <span
+                  key={tag}
+                  className="rounded-full bg-muted px-3 py-1 text-sm text-muted-foreground"
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
+          )}
+
+          {/* Product Interest Form */}
+          <div className="mt-16 pt-12 border-t border-border">
+            <ProductInterestForm productId={product.id} productName={product.name} />
           </div>
-        )}
+        </div>
       </div>
-    </div>
-  )
-}
+    )
+  }

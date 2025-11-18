@@ -47,3 +47,18 @@ export type SiteSetting = Prisma.SiteSettingModel
  * 
  */
 export type AdminUser = Prisma.AdminUserModel
+/**
+ * Model BlogLike
+ * 
+ */
+export type BlogLike = Prisma.BlogLikeModel
+/**
+ * Model BlogComment
+ * 
+ */
+export type BlogComment = Prisma.BlogCommentModel
+/**
+ * Model ProductInterest
+ * 
+ */
+export type ProductInterest = Prisma.ProductInterestModel
