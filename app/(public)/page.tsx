@@ -3,6 +3,10 @@ import Image from 'next/image'
 import { getProducts } from '@/lib/data/products'
 import { getBlogPosts } from '@/lib/data/blog'
 
+// Force dynamic rendering - always fetch fresh data from DB
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 async function getFeaturedProducts() {
   try {
     return await getProducts({ published: true, featured: true })
@@ -178,8 +182,8 @@ export default async function HomePage() {
                       </p>
                     )}
                     <div className="flex items-center text-xs text-muted-foreground pt-2">
-                      <time dateTime={post.createdAt}>
-                        {new Date(post.createdAt).toLocaleDateString('en-US', {
+                      <time dateTime={post.createdAt instanceof Date ? post.createdAt.toISOString() : new Date(post.createdAt).toISOString()}>
+                        {(post.createdAt instanceof Date ? post.createdAt : new Date(post.createdAt)).toLocaleDateString('en-US', {
                           month: 'short',
                           day: 'numeric',
                           year: 'numeric',

@@ -9,7 +9,16 @@ export async function GET(
 ) {
   try {
     const { slug } = await params
-    const post = await getBlogPostBySlug(slug)
+    
+    // Check if slug is actually an ID (cuid format) or a slug
+    const post = await prisma.blogPost.findFirst({
+      where: {
+        OR: [
+          { id: slug },
+          { slug: slug },
+        ],
+      },
+    })
 
     if (!post) {
       return NextResponse.json({ error: 'Post not found' }, { status: 404 })
