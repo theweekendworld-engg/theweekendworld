@@ -19,6 +19,10 @@ async function getProductStats(githubUrl: string | null) {
   return getGitHubRepoStats(repo.owner, repo.repo, process.env.GITHUB_TOKEN)
 }
 
+// Force dynamic rendering - always fetch fresh data from DB
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 export const metadata = {
   title: 'Products - TheWeekendWorld',
   description: 'Explore our collection of innovative products and solutions',
@@ -49,9 +53,10 @@ export default async function ProductsPage() {
       ) : (
         <section className="container px-4 py-24">
           <div className="mx-auto grid max-w-6xl grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {products.map(async (product: any) => {
-              const stats = await getProductStats(product.githubUrl)
-              return (
+            {(await Promise.all(
+              products.map(async (product: any) => {
+                const stats = await getProductStats(product.githubUrl)
+                return (
                 <Link
                   key={product.id}
                   href={`/products/${product.slug}`}
@@ -101,8 +106,9 @@ export default async function ProductsPage() {
                     <span className="ml-2 transition-transform group-hover:translate-x-1">→</span>
                   </div>
                 </Link>
-              )
-            })}
+                )
+              })
+            )).map((item) => item)}
           </div>
         </section>
       )}

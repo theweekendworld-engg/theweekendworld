@@ -1,110 +1,40 @@
-'use client'
-
-import { useEffect, useState } from 'react'
-import { useParams, notFound } from 'next/navigation'
+import { notFound } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
+import { getBlogPostBySlug, getBlogPosts } from '@/lib/data/blog'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import BlogLikes from '@/components/blog/BlogLikes'
 import BlogComments from '@/components/blog/BlogComments'
 
-interface BlogPost {
-  id: string
-  slug: string
-  title: string
-  excerpt?: string | null
-  content: string
-  coverImage?: string | null
-  author: string
-  category?: string | null
-  tags?: string[]
-  published: boolean
-  createdAt: string
+// Force dynamic rendering - always fetch fresh data from DB
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
+interface PageProps {
+  params: Promise<{ slug: string }>
 }
 
-export default function BlogPostPage() {
-  const params = useParams()
-  const slug = params.slug as string
-  const [post, setPost] = useState<BlogPost | null>(null)
-  const [relatedPosts, setRelatedPosts] = useState<BlogPost[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(false)
+export default async function BlogPostPage({ params }: PageProps) {
+  const { slug } = await params
+  
+  // Fetch directly from database - no API route, no caching
+  const post = await getBlogPostBySlug(slug)
 
-  useEffect(() => {
-    async function fetchPost() {
-      try {
-        const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || window.location.origin
-        // Browser will automatically cache based on Cache-Control headers
-        const res = await fetch(`${baseUrl}/api/blog/${slug}`, {
-          cache: 'default', // Use browser's HTTP cache
-        })
-        
-        if (!res.ok) {
-          setError(true)
-          setLoading(false)
-          return
-        }
-
-        const fetchedPost = await res.json()
-        
-        if (!fetchedPost || !fetchedPost.published) {
-          setError(true)
-          setLoading(false)
-          return
-        }
-
-        setPost(fetchedPost)
-
-        // Fetch related posts
-        const category = fetchedPost.category
-        const relatedRes = await fetch(
-          `${baseUrl}/api/blog?published=true${category ? `&category=${category}` : ''}`,
-          {
-            cache: 'default',
-          }
-        )
-        if (relatedRes.ok) {
-          const allPosts = await relatedRes.json()
-          const related = allPosts
-            .filter((p: BlogPost) => p.slug !== slug)
-            .slice(0, 3)
-          setRelatedPosts(related)
-        }
-      } catch (err) {
-        console.error('Error fetching blog post:', err)
-        setError(true)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    if (slug) {
-      fetchPost()
-    }
-  }, [slug])
-
-  if (loading) {
-    return (
-      <div className="container px-4 py-16">
-        <div className="mx-auto max-w-4xl">
-          <div className="animate-pulse space-y-8">
-            <div className="h-12 bg-muted rounded-lg w-3/4"></div>
-            <div className="h-6 bg-muted rounded w-1/2"></div>
-            <div className="h-64 bg-muted rounded-lg"></div>
-            <div className="space-y-4">
-              <div className="h-4 bg-muted rounded"></div>
-              <div className="h-4 bg-muted rounded"></div>
-              <div className="h-4 bg-muted rounded w-5/6"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    )
+  if (!post || !post.published) {
+    notFound()
   }
 
-  if (error || !post) {
-    notFound()
+  // Fetch related posts (same category, excluding current post)
+  let relatedPosts: typeof post[] = []
+  if (post.category) {
+    const allPosts = await getBlogPosts({ 
+      published: true, 
+      category: post.category 
+    })
+    relatedPosts = allPosts
+      .filter((p) => p.slug !== slug)
+      .slice(0, 3)
   }
 
   // Calculate reading time (average 200 words per minute)
@@ -154,8 +84,8 @@ export default function BlogPostPage() {
                   <span className="font-medium text-foreground">{post.author}</span>
                 </div>
                 <span>•</span>
-                <time dateTime={post.createdAt} className="font-medium">
-                  {new Date(post.createdAt).toLocaleDateString('en-US', {
+                <time dateTime={post.createdAt instanceof Date ? post.createdAt.toISOString() : new Date(post.createdAt).toISOString()} className="font-medium">
+                  {(post.createdAt instanceof Date ? post.createdAt : new Date(post.createdAt)).toLocaleDateString('en-US', {
                     year: 'numeric',
                     month: 'long',
                     day: 'numeric',
@@ -200,7 +130,7 @@ export default function BlogPostPage() {
             <ReactMarkdown remarkPlugins={[remarkGfm]}>{post.content}</ReactMarkdown>
           </div>
 
-          {/* Likes */}
+          {/* Likes - Client Component for interactivity */}
           <div className="mb-12 flex items-center justify-center">
             <BlogLikes slug={slug} />
           </div>
@@ -225,7 +155,7 @@ export default function BlogPostPage() {
             </div>
           )}
 
-          {/* Comments */}
+          {/* Comments - Client Component for interactivity */}
           <BlogComments slug={slug} />
 
           {/* Related Posts */}
@@ -268,8 +198,8 @@ export default function BlogPostPage() {
                         </p>
                       )}
                       <div className="flex items-center text-xs text-muted-foreground pt-2">
-                        <time dateTime={relatedPost.createdAt}>
-                          {new Date(relatedPost.createdAt).toLocaleDateString('en-US', {
+                        <time dateTime={relatedPost.createdAt instanceof Date ? relatedPost.createdAt.toISOString() : new Date(relatedPost.createdAt).toISOString()}>
+                          {(relatedPost.createdAt instanceof Date ? relatedPost.createdAt : new Date(relatedPost.createdAt)).toLocaleDateString('en-US', {
                             month: 'short',
                             day: 'numeric',
                             year: 'numeric',

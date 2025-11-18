@@ -1,6 +1,6 @@
-import { redirect } from 'next/navigation'
 import { auth } from '@/lib/auth'
 import Link from 'next/link'
+import AdminLayoutWrapper from '@/components/admin/AdminLayoutWrapper'
 
 export default async function AdminLayout({
   children,
@@ -9,9 +9,12 @@ export default async function AdminLayout({
 }) {
   const session = await auth()
 
+  // If no session, let the wrapper component handle redirect based on pathname
+  // The login page will be allowed through by the wrapper
   if (!session) {
-    redirect('/admin/login')
+    return <AdminLayoutWrapper>{children}</AdminLayoutWrapper>
   }
+
 
   return (
     <div className="min-h-screen bg-background">

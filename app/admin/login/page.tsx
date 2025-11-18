@@ -1,7 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { signIn } from 'next-auth/react'
 
 export default function AdminLoginPage() {
   const [username, setUsername] = useState('')
@@ -9,6 +10,8 @@ export default function AdminLoginPage() {
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const callbackUrl = searchParams.get('callbackUrl') || '/admin'
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -16,23 +19,17 @@ export default function AdminLoginPage() {
     setIsLoading(true)
 
     try {
-      const response = await fetch('/api/auth/callback/credentials', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: new URLSearchParams({
-          username,
-          password,
-          redirect: 'false',
-        }),
+      const result = await signIn('credentials', {
+        username,
+        password,
+        redirect: false,
       })
 
-      if (response.ok) {
-        router.push('/admin')
-        router.refresh()
-      } else {
+      if (result?.error) {
         setError('Invalid username or password')
+      } else if (result?.ok) {
+        router.push(callbackUrl)
+        router.refresh()
       }
     } catch (error) {
       setError('An error occurred. Please try again.')

@@ -11,6 +11,10 @@ async function fetchBlogPosts() {
   }
 }
 
+// Force dynamic rendering - always fetch fresh data from DB
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 export const metadata = {
   title: 'Blog - TheWeekendWorld',
   description: 'Read our latest articles on coding, system design, and technology',

@@ -1,105 +1,41 @@
-'use client'
-
-import { useEffect, useState } from 'react'
-import { useParams, notFound } from 'next/navigation'
+import { notFound } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
-import { extractRepoFromUrl } from '@/lib/github'
+import { getProductBySlug } from '@/lib/data/products'
+import { extractRepoFromUrl, getGitHubRepoStats } from '@/lib/github'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import ProductInterestForm from '@/components/products/ProductInterestForm'
 
-interface Product {
-  id: string
-  slug: string
-  name: string
-  description: string
-  shortDescription?: string
-  featuredImage?: string | null
-  gallery?: any
-  videoUrl?: string | null
-  githubUrl?: string | null
-  liveUrl?: string | null
-  features?: any
-  tags?: string[]
-  published: boolean
-  testimonials?: any[]
+// Force dynamic rendering - always fetch fresh data from DB
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
+interface PageProps {
+  params: Promise<{ slug: string }>
 }
 
-export default function ProductDetailPage() {
-  const params = useParams()
-  const slug = params.slug as string
-  const [product, setProduct] = useState<Product | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(false)
-  const [stats, setStats] = useState<any>(null)
+export default async function ProductDetailPage({ params }: PageProps) {
+  const { slug } = await params
+  
+  // Fetch directly from database - no API route, no caching
+  const product = await getProductBySlug(slug)
 
-  useEffect(() => {
-    async function fetchProduct() {
-      try {
-        const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || window.location.origin
-        // Browser will automatically cache based on Cache-Control headers
-        const res = await fetch(`${baseUrl}/api/products?published=true`, {
-          cache: 'default', // Use browser's HTTP cache
-        })
-        if (!res.ok) {
-          setError(true)
-          setLoading(false)
-          return
-        }
-        const products = await res.json()
-        const foundProduct = products.find((p: Product) => p.slug === slug && p.published)
-        
-        if (!foundProduct) {
-          setError(true)
-          setLoading(false)
-          return
-        }
-
-        setProduct(foundProduct)
-
-        // Fetch GitHub stats if available
-        if (foundProduct.githubUrl) {
-          const repo = extractRepoFromUrl(foundProduct.githubUrl)
-          if (repo) {
-            try {
-              const statsRes = await fetch(`${baseUrl}/api/github/stats/${repo.owner}/${repo.repo}`, {
-                cache: 'default',
-              })
-              if (statsRes.ok) {
-                const githubStats = await statsRes.json()
-                setStats(githubStats)
-              }
-            } catch (err) {
-              // GitHub stats are optional
-            }
-          }
-        }
-      } catch (err) {
-        console.error('Error fetching product:', err)
-        setError(true)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    if (slug) {
-      fetchProduct()
-    }
-  }, [slug])
-
-  if (loading) {
-    return (
-      <div className="container px-4 py-16">
-        <div className="mx-auto max-w-4xl text-center">
-          <p className="text-muted-foreground">Loading...</p>
-        </div>
-      </div>
-    )
+  if (!product || !product.published) {
+    notFound()
   }
 
-  if (error || !product) {
-    notFound()
+  // Fetch GitHub stats if available (optional, can fail)
+  let stats = null
+  if (product.githubUrl) {
+    const repo = extractRepoFromUrl(product.githubUrl)
+    if (repo) {
+      try {
+        stats = await getGitHubRepoStats(repo.owner, repo.repo, process.env.GITHUB_TOKEN)
+      } catch (err) {
+        // GitHub stats are optional, continue without them
+      }
+    }
   }
 
   const gallery = product.gallery && Array.isArray(product.gallery) ? product.gallery : []
@@ -249,25 +185,25 @@ export default function ProductDetailPage() {
           </div>
         )}
 
-          {/* Tags */}
-          {product.tags && product.tags.length > 0 && (
-            <div className="mb-12 flex flex-wrap gap-2">
-              {product.tags.map((tag: string) => (
-                <span
-                  key={tag}
-                  className="rounded-full bg-muted px-3 py-1 text-sm text-muted-foreground"
-                >
-                  {tag}
-                </span>
-              ))}
-            </div>
-          )}
-
-          {/* Product Interest Form */}
-          <div className="mt-16 pt-12 border-t border-border">
-            <ProductInterestForm productId={product.id} productName={product.name} />
+        {/* Tags */}
+        {product.tags && product.tags.length > 0 && (
+          <div className="mb-12 flex flex-wrap gap-2">
+            {product.tags.map((tag: string) => (
+              <span
+                key={tag}
+                className="rounded-full bg-muted px-3 py-1 text-sm text-muted-foreground"
+              >
+                {tag}
+              </span>
+            ))}
           </div>
+        )}
+
+        {/* Product Interest Form - Client Component for interactivity */}
+        <div className="mt-16 pt-12 border-t border-border">
+          <ProductInterestForm productId={product.id} productName={product.name} />
         </div>
       </div>
-    )
-  }
+    </div>
+  )
+}
