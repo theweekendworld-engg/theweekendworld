@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
-import ReCAPTCHA from 'react-google-recaptcha'
+import { useState, useEffect } from 'react'
+import { executeRecaptcha } from '@/lib/recaptcha-v3'
 import { MessageSquare, Send, User } from 'lucide-react'
 
 interface Comment {
@@ -24,7 +24,6 @@ export default function BlogComments({ slug }: BlogCommentsProps) {
   const [submitting, setSubmitting] = useState(false)
   const [showForm, setShowForm] = useState(false)
   const [replyingTo, setReplyingTo] = useState<string | null>(null)
-  const recaptchaRef = useRef<ReCAPTCHA>(null)
   
   const [formData, setFormData] = useState({
     content: '',
@@ -64,13 +63,15 @@ export default function BlogComments({ slug }: BlogCommentsProps) {
       return
     }
 
-    const captchaToken = recaptchaRef.current?.getValue()
+    setSubmitting(true)
+
+    // Execute reCAPTCHA v3
+    const captchaToken = await executeRecaptcha('blog_comment')
     if (!captchaToken) {
-      alert('Please complete the CAPTCHA')
+      alert('CAPTCHA verification failed. Please try again.')
+      setSubmitting(false)
       return
     }
-
-    setSubmitting(true)
 
     try {
       const res = await fetch(`/api/blog/${slug}/comments`, {
@@ -102,7 +103,6 @@ export default function BlogComments({ slug }: BlogCommentsProps) {
         setFormData({ content: '', authorName: '', email: '', isAnonymous: false })
         setShowForm(false)
         setReplyingTo(null)
-        recaptchaRef.current?.reset()
       } else {
         const error = await res.json()
         alert(error.error || 'Failed to submit comment')
@@ -223,16 +223,6 @@ export default function BlogComments({ slug }: BlogCommentsProps) {
                 </p>
               </div>
             </>
-          )}
-
-          {process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY && (
-            <div>
-              <ReCAPTCHA
-                ref={recaptchaRef}
-                sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}
-                theme="light"
-              />
-            </div>
           )}
 
           <div className="flex items-center gap-3">

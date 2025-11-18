@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useRef } from 'react'
-import ReCAPTCHA from 'react-google-recaptcha'
+import { useState } from 'react'
+import { executeRecaptcha } from '@/lib/recaptcha-v3'
 import { Send, CheckCircle2 } from 'lucide-react'
 
 interface ProductInterestFormProps {
@@ -18,7 +18,6 @@ export default function ProductInterestForm({ productId, productName }: ProductI
   const [submitting, setSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const recaptchaRef = useRef<ReCAPTCHA>(null)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -35,13 +34,15 @@ export default function ProductInterestForm({ productId, productName }: ProductI
       return
     }
 
-    const captchaToken = recaptchaRef.current?.getValue()
+    setSubmitting(true)
+
+    // Execute reCAPTCHA v3
+    const captchaToken = await executeRecaptcha('product_interest')
     if (!captchaToken) {
-      setError('Please complete the CAPTCHA verification')
+      setError('CAPTCHA verification failed. Please try again.')
+      setSubmitting(false)
       return
     }
-
-    setSubmitting(true)
 
     try {
       const res = await fetch(`/api/products/${productId}/interest`, {
@@ -56,7 +57,6 @@ export default function ProductInterestForm({ productId, productName }: ProductI
       if (res.ok) {
         setSubmitted(true)
         setFormData({ name: '', email: '', message: '' })
-        recaptchaRef.current?.reset()
       } else {
         const errorData = await res.json()
         setError(errorData.error || 'Failed to submit. Please try again.')
@@ -145,15 +145,6 @@ export default function ProductInterestForm({ productId, productName }: ProductI
           />
         </div>
 
-        {process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY && (
-          <div>
-            <ReCAPTCHA
-              ref={recaptchaRef}
-              sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}
-              theme="light"
-            />
-          </div>
-        )}
 
         <button
           type="submit"

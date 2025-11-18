@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useRef } from 'react'
-import ReCAPTCHA from 'react-google-recaptcha'
+import { useState } from 'react'
+import { executeRecaptcha } from '@/lib/recaptcha-v3'
 import { Send, Mail, MessageSquare, User, CheckCircle2, AlertCircle } from 'lucide-react'
 
 export default function ContactPage() {
@@ -14,7 +14,6 @@ export default function ContactPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle')
   const [error, setError] = useState<string | null>(null)
-  const recaptchaRef = useRef<ReCAPTCHA>(null)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -30,12 +29,15 @@ export default function ContactPage() {
       return
     }
 
-    // Validate CAPTCHA if enabled
-    const captchaToken = recaptchaRef.current?.getValue()
-    if (process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY && !captchaToken) {
-      setError('Please complete the CAPTCHA verification')
-      setIsSubmitting(false)
-      return
+    // Execute reCAPTCHA v3 if enabled
+    let captchaToken: string | null = null
+    if (process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY) {
+      captchaToken = await executeRecaptcha('contact_form')
+      if (!captchaToken) {
+        setError('CAPTCHA verification failed. Please try again.')
+        setIsSubmitting(false)
+        return
+      }
     }
 
     try {
@@ -53,7 +55,6 @@ export default function ContactPage() {
       if (response.ok) {
         setSubmitStatus('success')
         setFormData({ name: '', email: '', subject: '', message: '' })
-        recaptchaRef.current?.reset()
       } else {
         const errorData = await response.json()
         setError(errorData.error || 'Something went wrong. Please try again.')
@@ -164,15 +165,6 @@ export default function ContactPage() {
                 />
               </div>
 
-              {process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY && (
-                <div>
-                  <ReCAPTCHA
-                    ref={recaptchaRef}
-                    sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}
-                    theme="light"
-                  />
-                </div>
-              )}
 
               <button
                 type="submit"
