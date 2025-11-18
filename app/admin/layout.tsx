@@ -44,6 +44,12 @@ export default async function AdminLayout({
               Blog Posts
             </Link>
             <Link
+              href="/admin/contact"
+              className="block rounded-md px-3 py-2 text-sm font-medium hover:bg-muted"
+            >
+              Contact Messages
+            </Link>
+            <Link
               href="/admin/settings"
               className="block rounded-md px-3 py-2 text-sm font-medium hover:bg-muted"
             >
