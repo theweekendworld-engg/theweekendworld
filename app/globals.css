@@ -161,6 +161,40 @@ html {
   animation: pulse-glow 2s ease-in-out infinite;
 }
 
+/* Weekend color palette */
+:root {
+  --weekend-orange: #FF6B35;
+  --weekend-yellow: #FFD23F;
+  --weekend-blue: #4ECDC4;
+  --weekend-teal: #06A77D;
+}
+
+/* Weekend gradient animations */
+@keyframes weekend-gradient {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+.animate-weekend-gradient {
+  background: linear-gradient(
+    90deg,
+    var(--weekend-orange) 0%,
+    var(--weekend-yellow) 25%,
+    var(--weekend-blue) 50%,
+    var(--weekend-teal) 75%,
+    var(--weekend-orange) 100%
+  );
+  background-size: 200% 200%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: weekend-gradient 4s ease-in-out infinite;
+}
+
 .container {
   width: 100%;
   margin-left: auto;

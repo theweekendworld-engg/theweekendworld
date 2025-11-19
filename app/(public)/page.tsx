@@ -2,6 +2,11 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { getProducts } from '@/lib/data/products'
 import { getBlogPosts } from '@/lib/data/blog'
+import WeekendCountdown from '@/components/weekend/WeekendCountdown'
+import { getVibeRecommendations } from '@/lib/data/weekend'
+import WeekendVibeClient from '@/components/weekend/WeekendVibeClient'
+import WeeklyPicks from '@/components/weekend/WeeklyPicks'
+import CommunityStories from '@/components/weekend/CommunityStories'
 
 // Force dynamic rendering - always fetch fresh data from DB
 export const dynamic = 'force-dynamic'
@@ -29,14 +34,18 @@ async function getRecentBlogPosts() {
 export default async function HomePage() {
   const featuredProducts = await getFeaturedProducts()
   const recentPosts = await getRecentBlogPosts()
+  const vibeRecommendations = await getVibeRecommendations()
 
   return (
     <div className="flex flex-col">
       {/* Hero Section */}
-      <section className="relative overflow-hidden border-b">
+      <section className="relative overflow-hidden border-b min-h-[calc(100vh-4rem)] flex items-center">
         <div className="absolute inset-0 bg-gradient-to-b from-muted/50 via-background to-background" />
-        <div className="container relative px-4 py-24 md:py-32 lg:py-40">
+        <div className="container relative px-4 py-12 md:py-16">
           <div className="mx-auto max-w-4xl text-center">
+            {/* Weekend Countdown Timer */}
+            <WeekendCountdown />
+            
             <div className="mb-8 inline-flex items-center rounded-full border border-border bg-muted/50 px-4 py-1.5 text-xs font-medium text-muted-foreground backdrop-blur-sm">
               <span className="mr-2 h-2 w-2 rounded-full bg-green-500 animate-pulse" />
               Building the future, one weekend at a time
@@ -73,9 +82,32 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {/* Vibe Selector Section */}
+      <section id="weekend-countdown" className="scroll-mt-20 relative overflow-hidden border-b">
+        <div className="absolute inset-0 bg-gradient-to-br from-orange-50/50 via-yellow-50/30 to-teal-50/50 dark:from-orange-950/10 dark:via-yellow-950/5 dark:to-teal-950/10" />
+        <div className="container relative px-4 py-16 md:py-20">
+          <div className="mx-auto max-w-4xl">
+            <p className="text-center text-sm font-medium text-muted-foreground mb-6">
+              Choose your weekend vibe
+            </p>
+            <WeekendVibeClient vibeRecommendations={vibeRecommendations} />
+          </div>
+        </div>
+      </section>
+
+      {/* Weekly Picks */}
+      <section id="weekly-picks" className="scroll-mt-20">
+        <WeeklyPicks />
+      </section>
+
+      {/* Community Stories */}
+      <section id="community-stories" className="scroll-mt-20">
+        <CommunityStories />
+      </section>
+
       {/* Featured Products */}
       {featuredProducts.length > 0 && (
-        <section className="container px-4 py-24">
+        <section id="featured-products" className="scroll-mt-20 container px-4 py-24">
           <div className="mx-auto max-w-2xl text-center mb-16">
             <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Featured Products</h2>
             <p className="mt-4 text-lg text-muted-foreground">
@@ -141,7 +173,7 @@ export default async function HomePage() {
 
       {/* Recent Blog Posts */}
       {recentPosts.length > 0 && (
-        <section className="border-t bg-muted/30">
+        <section id="blog" className="scroll-mt-20 border-t bg-muted/30">
           <div className="container px-4 py-24">
             <div className="mx-auto max-w-2xl text-center mb-16">
               <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Latest from Blog</h2>

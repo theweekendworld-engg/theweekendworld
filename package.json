@@ -11,6 +11,7 @@
     "db:migrate": "prisma migrate dev",
     "db:studio": "prisma studio",
     "db:seed": "bun prisma/seed.ts",
+    "db:seed-weekend": "bun prisma/seed-weekend.ts",
     "create-admin": "bun scripts/create-admin.ts"
   },
   "dependencies": {
